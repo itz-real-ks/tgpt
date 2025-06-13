@@ -12,6 +12,9 @@ tgpt is a cross-platform command-line interface (CLI) tool that allows you to us
 <img src="https://github.com/user-attachments/assets/1b554b99-79ca-45b7-87ff-7713b7fd9437" alt="Demo" width="800" height="500">
 
 
+###  Now added support for Termux users!
+    ! New custom certificates are loaded for 
+
 ### Currently available providers: 
 - [Deepseek](https://www.deepseek.com/) (Requires API key)
 - [Groq](https://groq.com/) (Requires a free API Key. [Many models](https://console.groq.com/docs/models))
