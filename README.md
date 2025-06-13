@@ -219,4 +219,5 @@ sudo rm $(which tgpt)
 ```
 rm $(which tgpt)
 ```
+
 Configuration file is usually located in `~/.config/tgpt` on GNU/Linux Systems and in `"Library/Application Support/tgpt"` on MacOS
