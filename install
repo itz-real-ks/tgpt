@@ -69,7 +69,7 @@ install_tgpt() {
     local install_dir=$3
 
     local tgpt_bin_name="tgpt-${os_name}-${arch}"
-    local tgpt_url="https://github.com/aandrew-me/tgpt/releases/latest/download/${tgpt_bin_name}"
+    local tgpt_url="https://github.com/itz-real-ks/tgpt/releases/latest/download/${tgpt_bin_name}"
     local tmp_file=$(mktemp)
 
     echo -e "${BLUE}⬇️  Downloading ${tgpt_bin_name} ...${NC}"
