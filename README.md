@@ -1,3 +1,5 @@
+# Be hold -{HIGHLY EXPERIMENTAL!!!}
+# SYSTEM ENV CAN BREAK FOR SOME UNKNOWN REASON... PROBABLY BE SOLVED SOONER 
 <p align="center"><img src="tgpt.svg"></p>
 
 # Terminal GPT (tgpt) 🚀
