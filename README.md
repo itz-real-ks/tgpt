@@ -215,7 +215,7 @@ If you installed with the install script, you can execute the following command 
 ```
 sudo rm $(which tgpt)
 ```
-# For Termux users : 
+### For Termux users : 
 ```
 rm $(which tgpt)
 ```
