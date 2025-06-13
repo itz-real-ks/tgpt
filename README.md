@@ -215,4 +215,8 @@ If you installed with the install script, you can execute the following command 
 ```
 sudo rm $(which tgpt)
 ```
+# For Termux users : 
+```
+rm $(which tgpt)
+```
 Configuration file is usually located in `~/.config/tgpt` on GNU/Linux Systems and in `"Library/Application Support/tgpt"` on MacOS
