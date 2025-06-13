@@ -11,6 +11,8 @@ tgpt is a cross-platform command-line interface (CLI) tool that allows you to us
 
 <img src="https://github.com/user-attachments/assets/1b554b99-79ca-45b7-87ff-7713b7fd9437" alt="Demo" width="800" height="500">
 
+### Now added support for Termux! 🚀
+To enable tgpt in Termux, we implemented custom certificate loading in client.go, allowing the client to trust specific certificates within the environment. Additionally, server-side certificate verification was upgraded to load and update trusted certs in Termux, ensuring secure SSL/TLS communication despite environment constraints.
 
 ### Currently available providers: 
 - [Deepseek](https://www.deepseek.com/) (Requires API key)
