@@ -142,11 +142,16 @@ echo -e "${BLUE}⚙️  Architecture: $arch${NC}"
 echo -e "${BLUE}📁 Installation Path: $install_dir${NC}"
 echo
 
-read -p "➡️  Proceed with installation? (y/n): " confirm
-if [[ "${confirm,,}" != "y" ]]; then
-    echo -e "${RED}❌ Installation cancelled by user.${NC}"
-    exit 0
+if [ -t 0 ]; then
+    read -p "➡️  Proceed with installation? (y/n): " confirm
+    if [[ "${confirm,,}" != "y" ]]; then
+        echo -e "${RED}❌ Installation cancelled by user.${NC}"
+        exit 0
+    fi
+else
+    echo -e "${YELLOW}⚠️  No interactive terminal detected. Proceeding without confirmation...${NC}"
 fi
+
 
 # === [ Do the actual installation ] === #
 install_tgpt "$os_name" "$arch" "$install_dir"
