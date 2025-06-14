@@ -1,5 +1,5 @@
 # Be hold -{HIGHLY EXPERIMENTAL!!!}
-# SYSTEM ENV CAN BREAK FOR SOME UNKNOWN REASON... PROBABLY BE SOLVED SOONER 
+#### This is a fork of [Tgpt](https://github.com/aandrew-me/tgpt) by ^_+ [@aandrew-me](https://github.com/aandrew-me/)
 <p align="center"><img src="tgpt.svg"></p>
 
 # Terminal GPT (tgpt) 🚀
@@ -11,6 +11,7 @@
 
 tgpt is a cross-platform command-line interface (CLI) tool that allows you to use AI chatbot in your Terminal without requiring API keys. 
 
+###### This fork was possible with the only helps of ChatGPT, DuckAI (multiple models), PhindAI, Meta AI they provided the bases of this fork
 <img src="https://github.com/user-attachments/assets/1b554b99-79ca-45b7-87ff-7713b7fd9437" alt="Demo" width="800" height="500">
 
 ### Now added support for Termux! 🚀
@@ -131,11 +132,29 @@ cat install.sh | tgpt "Explain the code"
 
 The default download location is `/usr/local/bin`, but you can change it in the command to use a different location. However, make sure the location is added to your PATH environment variable for easy accessibility.
 
-You can download it with the following command:
+You can install it with the following command:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/aandrew-me/tgpt/main/install | bash -s /usr/local/bin
+curl -fsSL https://raw.githubusercontent.com/itz-real-ks/tgpt/refs/heads/main/install | bash
 ```
+## If you are using **_Termux_** 🔥, follow as below:
+
+**Step 1**: Install the tool by this
+```
+curl -fsSL https://raw.githubusercontent.com/itz-real-ks/tgpt/refs/heads/main/install | bash
+```
+**Step 2**_(Recommanded)_: This is to update to new _cert.pem_ used for server certificate verifications
+```
+curl -fsSL https://raw.githubusercontent.com/itz-real-ks/tgpt/refs/heads/main/cert-upgrade | bash
+```
+You are now good to go!
+```
+tgpt "<your prompt>"
+```
+
+--------------------------------------------------------------------------------------------
+
+#### ALL THE BELOW ARE NOT MEANT FOR INSTALLATION ON TERMUX
 
 If you are using Arch Linux, you can install with pacman:
 
