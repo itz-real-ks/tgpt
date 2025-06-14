@@ -27,26 +27,32 @@ fi
 
 # === [ Detect OS and Architecture ] === #
 detect_os_and_arch() {
+    local os
+    local arch
+
     if $is_termux; then
-        echo "linux"
+        os="linux"
     else
         case $(uname -s) in
-            Darwin) echo "mac" ;;
-            *) echo "linux" ;;
+            Darwin) os="mac" ;;
+            *) os="linux" ;;
         esac
     fi
 
     case $(uname -m) in
-        x86_64) echo "amd64" ;;
-        i386|i686) echo "i386" ;;
-        aarch64|arm64) echo "arm64" ;;
-        arm|armv7l|armhf) echo "arm" ;;
+        x86_64) arch="amd64" ;;
+        i386|i686) arch="i386" ;;
+        aarch64|arm64) arch="arm64" ;;
+        arm|armv7l|armhf) arch="arm" ;;
         *)
-            echo -e "${RED}❌ Unsupported architecture: $(uname -m)${NC}"
+            echo -e "${RED}❌ Unsupported architecture: $(uname -m)${NC}" >&2
             exit 1
             ;;
     esac
+
+    echo "$os $arch"
 }
+
 
 # === [ Spinner for async tasks ] === #
 spinner() {
@@ -121,7 +127,7 @@ upgrade_cert_pem() {
 }
 
 # === [ Main Script ] === #
-read os_name arch <<< $(detect_os_and_arch)
+read os_name arch <<< "$(detect_os_and_arch)"
 
 if $is_termux; then
     install_dir="/data/data/com.termux/files/usr/bin"
