@@ -9,7 +9,6 @@ NC='\033[0m'
 
 # === [ Parse Arguments ] === #
 upgrade_certs=false
-
 for arg in "$@"; do
     case "$arg" in
         --upgrade-certs)
@@ -17,12 +16,12 @@ for arg in "$@"; do
             ;;
         -h|--help)
             echo -e "${BLUE}tgpt Installer Script${NC}"
-            echo -e "${BLUE}Usage:${NC} bash install [options]"
+            echo -e "${BLUE}Usage:${NC} bash install [options] [install-dir]"
             echo -e "  ${YELLOW}--upgrade-certs${NC}     Upgrade Termux cert.pem after installation"
             echo -e "  ${YELLOW}-h, --help${NC}           Show this help message"
             exit 0
             ;;
-        *)
+        -*)
             echo -e "${YELLOW}⚠️  Unknown option: ${arg}${NC}"
             ;;
     esac
@@ -33,6 +32,15 @@ if [ -n "$TERMUX_VERSION" ] || [[ "$PREFIX" == *com.termux* ]]; then
     is_termux=true
 else
     is_termux=false
+fi
+
+# === [ Optional user-supplied install dir ] === #
+if [ -n "$1" ] && [[ ! "$1" =~ ^- ]]; then
+    install_dir="$1"
+elif $is_termux; then
+    install_dir="${PREFIX}/bin"
+else
+    install_dir="/usr/local/bin"
 fi
 
 # === [ Check if curl is installed ] === #
@@ -48,25 +56,29 @@ fi
 
 # === [ Detect OS and Architecture ] === #
 detect_os_and_arch() {
+    local os
     if $is_termux; then
-        echo "linux"
+        os="linux"
     else
         case $(uname -s) in
-            Darwin) echo "mac" ;;
-            *) echo "linux" ;;
+            Darwin) os="mac" ;;
+            *) os="linux" ;;
         esac
     fi
 
+    local arch
     case $(uname -m) in
-        x86_64) echo "amd64" ;;
-        i386|i686) echo "i386" ;;
-        aarch64|arm64) echo "arm64" ;;
-        arm|armv7l|armhf) echo "arm" ;;
+        x86_64) arch="amd64" ;;
+        i386|i686) arch="i386" ;;
+        aarch64|arm64) arch="arm64" ;;
+        arm|armv7l|armhf) arch="arm" ;;
         *)
             echo -e "${RED}❌ Unsupported architecture: $(uname -m)${NC}"
             exit 1
             ;;
     esac
+
+    echo "$os $arch"
 }
 
 # === [ Spinner for async tasks ] === #
@@ -75,8 +87,8 @@ spinner() {
     local delay=0.1
     local spin='/-\|'
     while ps -p "$pid" > /dev/null 2>&1; do
-        for i in $(seq 0 3); do
-            echo -ne "\r${spin:i:1}  "
+        for ((i=0; i<${#spin}; i++)); do
+            echo -ne "\r${spin:$i:1} "
             sleep "$delay"
         done
     done
@@ -111,7 +123,11 @@ install_tgpt() {
         }
         chmod +x "$install_dir/tgpt"
     else
-        sudo mv "$tmp_file" "$install_dir/tgpt"
+        sudo mv "$tmp_file" "$install_dir/tgpt" || {
+            echo -e "${RED}🚫 Failed to move tgpt to $install_dir${NC}"
+            rm -f "$tmp_file"
+            exit 1
+        }
         sudo chmod +x "$install_dir/tgpt"
     fi
 
@@ -120,7 +136,7 @@ install_tgpt() {
 
 # === [ Upgrade cert.pem if --upgrade-certs is passed ] === #
 upgrade_cert_pem() {
-    if $is_termux && $upgrade_certs; then
+    if $upgrade_certs && $is_termux; then
         local cert_url="https://curl.se/ca/cacert.pem"
         local cert_path="${PREFIX}/etc/tls/cert.pem"
         local tmp_cert="${cert_path}.tmp"
@@ -138,19 +154,19 @@ upgrade_cert_pem() {
         }
 
         echo -e "${GREEN}🔐 cert.pem upgraded successfully.${NC}"
+    elif $upgrade_certs && ! $is_termux; then
+        echo -e "${YELLOW}ℹ️  --upgrade-certs is only applicable in Termux.${NC}"
     fi
 }
 
 # === [ Main Script Execution ] === #
-read os_name arch <<< "$(detect_os_and_arch)"
+read -r os_name arch <<< "$(detect_os_and_arch)"
 
-if $is_termux; then
-    install_dir="${PREFIX}/bin"
-else
-    install_dir="/usr/local/bin"
+if [[ -z "$os_name" || -z "$arch" ]]; then
+    echo -e "${RED}❌ Failed to detect OS or architecture.${NC}"
+    exit 1
 fi
 
-# === [ Display Summary ] === #
 echo -e "${BLUE}📦 tgpt Installer${NC}"
 echo -e "${BLUE}🖥️  OS: $os_name${NC}"
 echo -e "${BLUE}⚙️  Architecture: $arch${NC}"
