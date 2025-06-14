@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # === [ Define Colors ] === #
 RED='\033[0;31m'
