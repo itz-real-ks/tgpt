@@ -1,23 +1,18 @@
 #!/usr/bin/env bash
 
-# === [ Define Colors ] === #
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# === [ Parse Arguments ] === #
-upgrade_certs=false
+# Parse arguments
 for arg in "$@"; do
     case "$arg" in
-        --upgrade-certs)
-            upgrade_certs=true
-            ;;
         -h|--help)
             echo -e "${BLUE}tgpt Installer Script${NC}"
-            echo -e "${BLUE}Usage:${NC} bash install [options] [install-dir]"
-            echo -e "  ${YELLOW}--upgrade-certs${NC}     Upgrade Termux cert.pem after installation"
+            echo -e "${BLUE}Usage:${NC} bash v2-install [install-dir] [options]"
+            echo -e "  ${YELLOW}[install-dir]${NC}         Optional target install directory"
             echo -e "  ${YELLOW}-h, --help${NC}           Show this help message"
             exit 0
             ;;
@@ -27,14 +22,14 @@ for arg in "$@"; do
     esac
 done
 
-# === [ Detect if running on Termux ] === #
+# Detect Termux
 if [ -n "$TERMUX_VERSION" ] || [[ "$PREFIX" == *com.termux* ]]; then
     is_termux=true
 else
     is_termux=false
 fi
 
-# === [ Optional user-supplied install dir ] === #
+# Determine install directory
 if [ -n "$1" ] && [[ ! "$1" =~ ^- ]]; then
     install_dir="$1"
 elif $is_termux; then
@@ -43,7 +38,7 @@ else
     install_dir="/usr/local/bin"
 fi
 
-# === [ Check if curl is installed ] === #
+# Check for curl
 if ! command -v curl &> /dev/null; then
     echo -e "${RED}❌ curl is required but not installed.${NC}"
     if $is_termux; then
@@ -54,7 +49,7 @@ if ! command -v curl &> /dev/null; then
     exit 1
 fi
 
-# === [ Detect OS and Architecture ] === #
+# Detect OS and arch
 detect_os_and_arch() {
     local os
     if $is_termux; then
@@ -81,7 +76,7 @@ detect_os_and_arch() {
     echo "$os $arch"
 }
 
-# === [ Spinner for async tasks ] === #
+# Spinner
 spinner() {
     local pid=$1
     local delay=0.1
@@ -95,7 +90,7 @@ spinner() {
     echo -ne "\r   \r"
 }
 
-# === [ Install tgpt binary ] === #
+# Install tgpt
 install_tgpt() {
     local os_name=$1
     local arch=$2
@@ -134,38 +129,8 @@ install_tgpt() {
     echo -e "${GREEN}✅ tgpt installed at: $install_dir/tgpt${NC}"
 }
 
-# === [ Upgrade cert.pem if --upgrade-certs is passed ] === #
-upgrade_cert_pem() {
-    if $upgrade_certs && $is_termux; then
-        local cert_url="https://curl.se/ca/cacert.pem"
-        local cert_path="${PREFIX}/etc/tls/cert.pem"
-        local tmp_cert="${cert_path}.tmp"
-
-        echo -e "${BLUE}🌐 Upgrading cert.pem with latest CA certs ...${NC}"
-        curl -fSL --progress-bar "$cert_url" -o "$tmp_cert" || {
-            echo -e "${RED}❌ Failed to download cert.pem${NC}"
-            return 1
-        }
-
-        mv "$tmp_cert" "$cert_path" || {
-            echo -e "${RED}🚫 Failed to move cert.pem. Root may be required.${NC}"
-            rm -f "$tmp_cert"
-            return 1
-        }
-
-        echo -e "${GREEN}🔐 cert.pem upgraded successfully.${NC}"
-    elif $upgrade_certs && ! $is_termux; then
-        echo -e "${YELLOW}ℹ️  --upgrade-certs is only applicable in Termux.${NC}"
-    fi
-}
-
-# === [ Main Script Execution ] === #
+# === [ Main ] ===
 read -r os_name arch <<< "$(detect_os_and_arch)"
-
-if [[ -z "$os_name" || -z "$arch" ]]; then
-    echo -e "${RED}❌ Failed to detect OS or architecture.${NC}"
-    exit 1
-fi
 
 echo -e "${BLUE}📦 tgpt Installer${NC}"
 echo -e "${BLUE}🖥️  OS: $os_name${NC}"
@@ -180,9 +145,30 @@ if [[ "${confirm,,}" != "y" ]]; then
 fi
 
 install_tgpt "$os_name" "$arch" "$install_dir"
-upgrade_cert_pem
 
-# === [ Path Check Warning ] === #
+# Ask for cert.pem upgrade
+if $is_termux; then
+    read -p "🔐 Do you want to upgrade your cert.pem (recommended for network fixes)? (y/n): " cert_confirm
+    if [[ "${cert_confirm,,}" == "y" ]]; then
+        cert_url="https://curl.se/ca/cacert.pem"
+        cert_path="${PREFIX}/etc/tls/cert.pem"
+        tmp_cert="${cert_path}.tmp"
+
+        echo -e "${BLUE}🌐 Downloading latest CA bundle...${NC}"
+        curl -fSL --progress-bar "$cert_url" -o "$tmp_cert" || {
+            echo -e "${RED}❌ Failed to download new cert.pem${NC}"
+            rm -f "$tmp_cert"
+        }
+
+        if [ -f "$tmp_cert" ]; then
+            mv "$tmp_cert" "$cert_path" && \
+            echo -e "${GREEN}🔐 cert.pem upgraded successfully.${NC}" || \
+            echo -e "${RED}🚫 Failed to move new cert.pem — root might be needed.${NC}"
+        fi
+    fi
+fi
+
+# PATH warning
 if ! command -v tgpt &> /dev/null; then
     echo -e "${YELLOW}⚠️  'tgpt' is not in your PATH.${NC}"
     echo -e "${YELLOW}👉 Add this to your shell config:${NC}"
