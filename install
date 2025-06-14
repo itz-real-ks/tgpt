@@ -102,11 +102,11 @@ install_tgpt() {
 
 # === [ Upgrade cert.pem if user agrees ] === #
 upgrade_cert_pem() {
-    if $is_termux; then
+    if $is_termux && { [ -t 0 ] || [ "$UPGRADE_CERT" = "1" ]; }; then
         read -p "🔐 Upgrade cert.pem with latest CA certs? (y/n): " confirm
-        if [[ "${confirm,,}" == "y" ]]; then
+        if [[ "${confirm,,}" == "y" || "$UPGRADE_CERT" = "1" ]]; then
             local cert_url="https://curl.se/ca/cacert.pem"
-            local cert_path="/data/data/com.termux/files/usr/etc/tls/cert.pem"
+            local cert_path="${PREFIX}/etc/tls/cert.pem"
             local tmp_cert="${cert_path}.tmp"
 
             echo -e "${BLUE}🌐 Downloading cert.pem ...${NC}"
@@ -125,6 +125,7 @@ upgrade_cert_pem() {
         fi
     fi
 }
+
 
 # === [ Main Script ] === #
 read os_name arch <<< "$(detect_os_and_arch)"
