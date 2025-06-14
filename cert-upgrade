@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# === [ Define Colors ] === #
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# === [ Check if running on Termux ] === #
+if [ -n "$TERMUX_VERSION" ] || [[ "$PREFIX" == *com.termux* ]]; then
+    is_termux=true
+else
+    is_termux=false
+fi
+
+if ! $is_termux; then
+    echo -e "${YELLOW}⚠️  This script is designed to upgrade cert.pem on Termux only.${NC}"
+    echo -e "${RED}🚫 Not running in Termux. Exiting.${NC}"
+    exit 0
+fi
+
+# === [ Upgrade cert.pem in Termux ] === #
+cert_url="https://curl.se/ca/cacert.pem"
+cert_path="${PREFIX}/etc/tls/cert.pem"
+tmp_cert="${cert_path}.tmp"
+
+echo -e "${BLUE}🔐 Upgrading cert.pem in Termux...${NC}"
+curl -fSL --progress-bar "$cert_url" -o "$tmp_cert" || {
+    echo -e "${RED}❌ Failed to download new cert.pem${NC}"
+    exit 1
+}
+
+mv "$tmp_cert" "$cert_path" || {
+    echo -e "${RED}🚫 Failed to move new cert.pem to ${cert_path}${NC}"
+    rm -f "$tmp_cert"
+    exit 1
+}
+
+echo -e "${GREEN}✅ cert.pem upgraded successfully at: ${cert_path}${NC}"
